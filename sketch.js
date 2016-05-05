@@ -1,15 +1,15 @@
 var mapped;
 var go = true;
 var stations = {};
+var blips = [];
 var lastUpdate = 0;
-var UPDATE_INTERVAL = 10000; // update every 3000 milliseconds = 3 second
+var UPDATE_INTERVAL = 2000; // update every 1000 milliseconds = 1 second
 var trigger; 
 var ding;
 
 function preload() {
   var url = "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=ALL&key=MW9S-E7SL-26DU-VV8V";
   mapped = loadXML(url, mapStations);
-  trigger = UPDATE_INTERVAL;
   ding = loadSound('assets/ding.wav');
 }
 
@@ -25,7 +25,7 @@ function mapStations(data) {
     // Get time til departure in seconds
         // I THINK DEPARTURE TIME BECOMES NULL WHEN PARSEFLOAT TRIES TO PARSE OUT "LEAVING"
         // If departure time is null -> get the next element in the array? set off a blip first?
-    var departureTime = parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
+    var departureTime = 4//parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
     var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
     var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
     
@@ -47,16 +47,13 @@ function updateStation(data) {
 // TODO: mark that a request is going out and unmark that var in updateStation after done
           // to avoid any simultaneous updates to station and scatter times a bit more???
 function trainLeaving(station) {
-  console.log(station + " is leaving");
+  //console.log(station + " is leaving");
   // play sound
   ding.setVolume(0.1);
   ding.play();
   // build url to fetch next leaving time
   
   // loadXML with callback updateStation
-  
-
-  
 }
 
 // Update the time to leave from the stations
@@ -72,22 +69,38 @@ function updateStations(timeElapsed) {
       trainLeaving(station);
       // Temp reset for now
       stations[station]["seconds"] = 5 * 1000;
+      // Add new blip to the list of current blips
+      blips.push(new Blip(stations[station]["color"]));
     }
   }
-  
+  console.log("number blips = " + blips.length);
   //console.log("updated + " + (timeElapsed - lastUpdate));
   //console.log(stations)
   lastUpdate = timeElapsed;
 }
 
 function setup() {
-
+  createCanvas(windowWidth, windowHeight);
+  trigger = UPDATE_INTERVAL;
 }
 
 function draw() {
+  background(0);
   if(millis() > trigger) {
     updateStations(millis() / 1000);
     trigger = millis() + UPDATE_INTERVAL;
+  }
+  
+  // May skip over due to splice. Look into reversing for loop?
+  // Does it matter much with rate of draw though?
+  for(var i = 0; i < blips.length; i++) {
+    blips[i].update();
+    if(blips[i].a <= 0) {
+      blips.splice(i, 1);
+    }
+    else {
+      blips[i].display();
+    }
   }
 }
 

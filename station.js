@@ -2,11 +2,11 @@ function Station(departureTime, lineColor, direction) {
   this.departureTime = departureTime;
   this.lineColor = lineColor;
   this.direction = direction;
-  this.station
-  
+
   // Update the time until departure
   this.updateDepartureTime = function(timeSinceLastUpdate) {
     this.departureTime -= timeSinceLastUpdate;
+    //console.log("Updated to " + this.departureTime);
   }
   
   // Check if the train is departing
