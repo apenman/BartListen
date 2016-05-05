@@ -14,21 +14,23 @@ function preload() {
 }
 
 function mapStations(data) {
-  //console.log(data.getElementsByTagName("name"));
   var xmlStations = data.getElementsByTagName("station");
-  //console.log(xmlStations);
-  
+
   // TODO: handle case where xml node is missing (null values for firstChild)
             // probably just set each as a variable first
   for(var i = 0; i < xmlStations.length; i++) {
     var station = xmlStations[i];
     var stationName = station.firstChild.firstChild.nodeValue;
-    stations[stationName] = {
-      // Handle case where minutes == "Leaving"
-      seconds: parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60,
-      lineColor: station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue,
-      direction: station.getElementsByTagName("direction")[0].firstChild.nodeValue
-    }
+    
+    // Get time til departure in seconds
+        // I THINK DEPARTURE TIME BECOMES NULL WHEN PARSEFLOAT TRIES TO PARSE OUT "LEAVING"
+        // If departure time is null -> get the next element in the array? set off a blip first?
+    var departureTime = parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
+    var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
+    var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
+    
+    // Create new Station object and add to map
+    stations[stationName] = new Station(departureTime, lineColor, direction);
     //console.log(stations[stationName]);
     //console.log(stationName + " leaves in " + stations[stationName]["seconds"] + " seconds, going " + stations[stationName]["direction"]);
   }
@@ -63,15 +65,17 @@ function trainLeaving(station) {
 function updateStations(timeElapsed) {
   for(var station in stations) {
     // Calculate elapsed time by subtracting current with last known update time
-    stations[station]["seconds"] -= (timeElapsed - lastUpdate);
-    if(stations[station]["seconds"] <= 0) {
+    //console.log(station + " is at " + stations[station].seconds);
+    stations[station].updateDepartureTime(timeElapsed - lastUpdate);
+    //console.log("updated " + station + " to " + stations[station].seconds);
+    if(stations[station].isDeparting()) {
       trainLeaving(station);
       // Temp reset for now
       stations[station]["seconds"] = 5 * 1000;
     }
   }
   
-  console.log("updated + " + (timeElapsed - lastUpdate));
+  //console.log("updated + " + (timeElapsed - lastUpdate));
   //console.log(stations)
   lastUpdate = timeElapsed;
 }
