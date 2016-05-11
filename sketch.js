@@ -1,4 +1,3 @@
-var mapped;
 var go = true;
 var stations = {};
 var blips = [];
@@ -7,10 +6,21 @@ var UPDATE_INTERVAL = 2000; // update every 1000 milliseconds = 1 second
 var trigger; 
 var ding;
 
+// FOR SETTING UP URL FOR BART REQUESTS
+// ADD STATION ABBREVIATION OR 'ALL' BETWEEN baseUrl and urlKey
+var baseUrl = "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=";
+var urlKey = "&key=MW9S-E7SL-26DU-VV8V";
+
 function preload() {
-  var url = "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=ALL&key=MW9S-E7SL-26DU-VV8V";
-  mapped = loadXML(url, mapStations);
+  var url = buildRequestUrlFromStation("ALL");
+  loadXML(url, mapStations);
   ding = loadSound('assets/ding.wav');
+}
+
+// Return request url for given station abbreviation
+// Pass in 'ALL' for all stations
+function buildRequestUrlFromStation(abbreviation) {
+  return baseUrl + abbreviation + urlKey
 }
 
 function mapStations(data) {
@@ -25,13 +35,16 @@ function mapStations(data) {
     // Get time til departure in seconds
         // I THINK DEPARTURE TIME BECOMES NULL WHEN PARSEFLOAT TRIES TO PARSE OUT "LEAVING"
         // If departure time is null -> get the next element in the array? set off a blip first?
-    var departureTime = 4//parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
+    var departureTime = 4;//parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
     var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
     var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
-    
+    // "abbr" tag is used for the origin station abbreviation
+    // "abbreviation" tag is used for the destination stations
+    var abbreviation = station.getElementsByTagName("abbr")[0].firstChild.nodeValue;
     // Create new Station object and add to map
-    stations[stationName] = new Station(departureTime, lineColor, direction);
-    //console.log(stations[stationName]);
+    stations[stationName] = new Station(departureTime, lineColor, direction, abbreviation);
+    console.log(stationName);
+    console.log(stations[stationName]);
     //console.log(stationName + " leaves in " + stations[stationName]["seconds"] + " seconds, going " + stations[stationName]["direction"]);
   }
 }
@@ -39,8 +52,23 @@ function mapStations(data) {
 // Update station after train has left
 // Callback from loadXML after train leaves
 function updateStation(data) {
-  // update stations map with next departure
-  // add error checking to handle cases where train is delayed a bit (??)
+  console.log("UPDATESTATION CALLED")
+  // This is similar to initial load, find overlaps
+  var xmlStations = data.getElementsByTagName("station");
+    // TODO: handle case where xml node is missing (null values for firstChild)
+            // probably just set each as a variable first
+  for(var i = 0; i < xmlStations.length; i++) {
+    var station = xmlStations[i];
+    // update stations map with next departure
+    // add error checking to handle cases where train is delayed a bit (??)
+    var stationName = station.firstChild.firstChild.nodeValue;
+    console.log("UPDATING " + stationName);
+    var departureTime = parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
+    var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
+    var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
+  
+    stations[stationName].updateStation(departureTime, lineColor, direction);
+  }
 }
 
 // Train is leaving, get next departure
@@ -52,8 +80,10 @@ function trainLeaving(station) {
   ding.setVolume(0.1);
   ding.play();
   // build url to fetch next leaving time
-  
+  var url = buildRequestUrlFromStation(station.abbreviation);
+  console.log("UPDATING " + url);
   // loadXML with callback updateStation
+  loadXML(url, updateStation);
 }
 
 // Update the time to leave from the stations
@@ -66,14 +96,12 @@ function updateStations(timeElapsed) {
     stations[station].updateDepartureTime(timeElapsed - lastUpdate);
     //console.log("updated " + station + " to " + stations[station].seconds);
     if(stations[station].isDeparting()) {
-      trainLeaving(station);
-      // Temp reset for now
-      stations[station]["seconds"] = 5 * 1000;
+      trainLeaving(stations[station]);
       // Add new blip to the list of current blips
       blips.push(new Blip(stations[station]["color"]));
     }
   }
-  console.log("number blips = " + blips.length);
+  //console.log("number blips = " + blips.length);
   //console.log("updated + " + (timeElapsed - lastUpdate));
   //console.log(stations)
   lastUpdate = timeElapsed;
