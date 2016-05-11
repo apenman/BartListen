@@ -2,7 +2,7 @@ var go = true;
 var stations = {};
 var blips = [];
 var lastUpdate = 0;
-var UPDATE_INTERVAL = 2000; // update every 1000 milliseconds = 1 second
+var UPDATE_INTERVAL = 2000; // update every 1000 milliseconds = 1 second; increase later for less checking since api only works on minute basis anyways
 var trigger; 
 var ding;
 
