@@ -51,6 +51,8 @@ function mapStations(data) {
 
 // Update station after train has left
 // Callback from loadXML after train leaves
+// TODO: Check that departure time is not "LEAVING" so we don't update to exact same train, due to timing of call
+  // Investigate if case exists where trains may be leaving at same time in opposite directions
 function updateStation(data) {
   console.log("UPDATESTATION CALLED")
   // This is similar to initial load, find overlaps
@@ -75,13 +77,11 @@ function updateStation(data) {
 // TODO: mark that a request is going out and unmark that var in updateStation after done
           // to avoid any simultaneous updates to station and scatter times a bit more???
 function trainLeaving(station) {
-  //console.log(station + " is leaving");
   // play sound
   ding.setVolume(0.1);
   ding.play();
   // build url to fetch next leaving time
   var url = buildRequestUrlFromStation(station.abbreviation);
-  console.log("UPDATING " + url);
   // loadXML with callback updateStation
   loadXML(url, updateStation);
 }
