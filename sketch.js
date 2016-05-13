@@ -35,7 +35,7 @@ function mapStations(data) {
     // Get time til departure in seconds
         // I THINK DEPARTURE TIME BECOMES NULL WHEN PARSEFLOAT TRIES TO PARSE OUT "LEAVING"
         // If departure time is null -> get the next element in the array? set off a blip first?
-    var departureTime = 4;//parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
+    var departureTime = 2;//parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
     var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
     var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
     // "abbr" tag is used for the origin station abbreviation
@@ -43,8 +43,8 @@ function mapStations(data) {
     var abbreviation = station.getElementsByTagName("abbr")[0].firstChild.nodeValue;
     // Create new Station object and add to map
     stations[stationName] = new Station(departureTime, lineColor, direction, abbreviation);
-    console.log(stationName);
-    console.log(stations[stationName]);
+    //console.log(stationName);
+    //console.log(stations[stationName]);
     //console.log(stationName + " leaves in " + stations[stationName]["seconds"] + " seconds, going " + stations[stationName]["direction"]);
   }
 }
@@ -54,7 +54,7 @@ function mapStations(data) {
 // TODO: Check that departure time is not "LEAVING" so we don't update to exact same train, due to timing of call
   // Investigate if case exists where trains may be leaving at same time in opposite directions
 function updateStation(data) {
-  console.log("UPDATESTATION CALLED")
+  //console.log("UPDATESTATION CALLED")
   // This is similar to initial load, find overlaps
   var xmlStations = data.getElementsByTagName("station");
     // TODO: handle case where xml node is missing (null values for firstChild)
@@ -64,12 +64,13 @@ function updateStation(data) {
     // update stations map with next departure
     // add error checking to handle cases where train is delayed a bit (??)
     var stationName = station.firstChild.firstChild.nodeValue;
-    console.log("UPDATING " + stationName);
+    //console.log("UPDATING " + stationName);
     var departureTime = parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
     var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
     var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
   
     stations[stationName].updateStation(departureTime, lineColor, direction);
+    //console.log(stations[stationName]);
   }
 }
 
@@ -98,7 +99,7 @@ function updateStations(timeElapsed) {
     if(stations[station].isDeparting()) {
       trainLeaving(stations[station]);
       // Add new blip to the list of current blips
-      blips.push(new Blip(stations[station]["color"]));
+      blips.push(new Blip(stations[station]["lineColor"]));
     }
   }
   //console.log("number blips = " + blips.length);
@@ -123,7 +124,7 @@ function draw() {
   // Does it matter much with rate of draw though?
   for(var i = 0; i < blips.length; i++) {
     blips[i].update();
-    if(blips[i].a <= 0) {
+    if(blips[i].transparency >= 100) {
       blips.splice(i, 1);
     }
     else {

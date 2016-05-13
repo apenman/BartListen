@@ -24,7 +24,7 @@ function Station(departureTime, lineColor, direction, abbreviation) {
     this.departureTime = departureTime;
     this.lineColor = lineColor;
     this.direction = direction;
-    console.log("Updated " + this.abbreviation + " to"  + this.departureTime + this.direction);
+    //console.log("Updated " + this.abbreviation + " to"  + this.departureTime + this.direction);
   }
   
   // We probably don't want to make the api call to update the departure time after departing in here
