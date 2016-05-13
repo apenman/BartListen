@@ -27,7 +27,8 @@ function Blip(fillColor) {
   
   this.update = function() {
     this.rad += 5;
-  // NOTE: Handling opacity with Hex http://stackoverflow.com/questions/15852122/hex-transparency-in-colors
+  // NOTE: Handling opacity with Hex http://stackoverflow.com/questions/5445085/understanding-colors-in-android-6-characters/11019879#11019879
+        // Hex values are given as #AARRGGBB -> Bart api only gives us #RRGGBB, we need to prepend the alpha value and update
   // TODO: Write function to make blip transparent as it grows -> prepend proper value  
     var splitColor = this.fillColor.split("#");
     var newColor = splitColor[0];
