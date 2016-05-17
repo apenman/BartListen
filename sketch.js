@@ -71,7 +71,6 @@ function mapStations(data) {
 // TODO: Check that departure time is not "LEAVING" so we don't update to exact same train, due to timing of call
   // Investigate if case exists where trains may be leaving at same time in opposite directions
 function updateStation(data) {
-  //console.log("UPDATESTATION CALLED")
   // This is similar to initial load, find overlaps
   var xmlStations = data.getElementsByTagName("station");
     // TODO: handle case where xml node is missing (null values for firstChild)
@@ -81,13 +80,11 @@ function updateStation(data) {
     // update stations map with next departure
     // add error checking to handle cases where train is delayed a bit (??)
     var stationName = station.firstChild.firstChild.nodeValue;
-    //console.log("UPDATING " + stationName);
     var departureTime = parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
     var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
     var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
   
     stations[stationName].updateStation(departureTime, lineColor, direction);
-    //console.log(stations[stationName]);
   }
 }
 
@@ -110,18 +107,14 @@ function trainLeaving(station) {
 function updateStations(timeElapsed) {
   for(var station in stations) {
     // Calculate elapsed time by subtracting current with last known update time
-    //console.log(station + " is at " + stations[station].seconds);
     stations[station].updateDepartureTime(timeElapsed - lastUpdate);
-    //console.log("updated " + station + " to " + stations[station].seconds);
     if(stations[station].isDeparting()) {
       trainLeaving(stations[station]);
       // Add new blip to the list of current blips
       blips.push(new Blip(stations[station]["lineColor"]));
     }
   }
-  //console.log("number blips = " + blips.length);
-  //console.log("updated + " + (timeElapsed - lastUpdate));
-  //console.log(stations)
+
   lastUpdate = timeElapsed;
 }
 
@@ -131,7 +124,7 @@ function setup() {
 }
 
 function draw() {
-  background(0);
+  background(255);
   if(millis() > trigger) {
     updateStations(millis() / 1000);
     trigger = millis() + UPDATE_INTERVAL;
