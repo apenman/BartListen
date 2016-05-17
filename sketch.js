@@ -23,7 +23,7 @@ function buildRequestUrlFromStation(abbreviation) {
   return baseUrl + abbreviation + urlKey
 }
 
-// Hex values are given as #AARRGGBB -> Bart api only gives us #RRGGBB, need to prepend the alpha value to make updating easier
+// Bart API returns us line colors in Hex; Do one time conversion to RGBA to make blip fadeout easier
 // Taken from http://stackoverflow.com/a/5624139
 // Modified to add default alpha
 function hexToRGB(hex){
@@ -47,7 +47,7 @@ function mapStations(data) {
     // Get time til departure in seconds
         // I THINK DEPARTURE TIME BECOMES NULL WHEN PARSEFLOAT TRIES TO PARSE OUT "LEAVING"
         // If departure time is null -> get the next element in the array? set off a blip first?
-    var departureTime = 2;//parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
+    var departureTime = parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
     
     // Returns null if invalid
     // TODO: handle null
@@ -59,7 +59,6 @@ function mapStations(data) {
     // "abbr" tag is used for the origin station abbreviation
     // "abbreviation" tag is used for the destination stations
     var abbreviation = station.getElementsByTagName("abbr")[0].firstChild.nodeValue;
-    
     
     // Create new Station object and add to map
     stations[stationName] = new Station(departureTime, lineColor, direction, abbreviation);
