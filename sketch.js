@@ -23,9 +23,21 @@ function buildRequestUrlFromStation(abbreviation) {
   return baseUrl + abbreviation + urlKey
 }
 
+// Hex values are given as #AARRGGBB -> Bart api only gives us #RRGGBB, need to prepend the alpha value to make updating easier
+// Taken from http://stackoverflow.com/a/5624139
+// Modified to add default alpha
+function hexToRGB(hex){
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+        a: 100
+    } : null;
+}
+
 function mapStations(data) {
   var xmlStations = data.getElementsByTagName("station");
-
   // TODO: handle case where xml node is missing (null values for firstChild)
             // probably just set each as a variable first
   for(var i = 0; i < xmlStations.length; i++) {
@@ -36,16 +48,21 @@ function mapStations(data) {
         // I THINK DEPARTURE TIME BECOMES NULL WHEN PARSEFLOAT TRIES TO PARSE OUT "LEAVING"
         // If departure time is null -> get the next element in the array? set off a blip first?
     var departureTime = 2;//parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
-    var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
+    
+    // Returns null if invalid
+    // TODO: handle null
+    var lineColor = hexToRGB(station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue);
+    
+    // Get direction train is going
     var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
+     
     // "abbr" tag is used for the origin station abbreviation
     // "abbreviation" tag is used for the destination stations
     var abbreviation = station.getElementsByTagName("abbr")[0].firstChild.nodeValue;
+    
+    
     // Create new Station object and add to map
     stations[stationName] = new Station(departureTime, lineColor, direction, abbreviation);
-    //console.log(stationName);
-    //console.log(stations[stationName]);
-    //console.log(stationName + " leaves in " + stations[stationName]["seconds"] + " seconds, going " + stations[stationName]["direction"]);
   }
 }
 
@@ -124,7 +141,7 @@ function draw() {
   // Does it matter much with rate of draw though?
   for(var i = 0; i < blips.length; i++) {
     blips[i].update();
-    if(blips[i].transparency >= 100) {
+    if(blips[i].a <= 0) {
       blips.splice(i, 1);
     }
     else {
