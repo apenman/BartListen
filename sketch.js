@@ -110,7 +110,7 @@ function updateStations(timeElapsed) {
     if(stations[station].isDeparting()) {
       trainLeaving(stations[station]);
       // Add new blip to the list of current blips
-      blips.push(new Blip(stations[station]["lineColor"]));
+      blips.push(new Blip(stations[station]["lineColor"], station));
     }
   }
 
@@ -133,7 +133,7 @@ function draw() {
   // Does it matter much with rate of draw though?
   for(var i = 0; i < blips.length; i++) {
     blips[i].update();
-    if(blips[i].a <= 0) {
+    if(blips[i].rad >= 100) {
       blips.splice(i, 1);
     }
     else {
