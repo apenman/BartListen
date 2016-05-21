@@ -69,6 +69,7 @@ function getDepartureTimeFromXML(xml, index) {
     }
 }
 
+// TODO: Got lazy with null checks in mapStations and updateStation, now just assuming direction and abbreviation are there
 function mapStations(data) {
   var xmlStations = data.getElementsByTagName("station");
   

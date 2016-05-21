@@ -1,9 +1,9 @@
-// TODO: clean up the blip logic
-        // This can be refactored, probably will once more UI changes come along anyways
+
 function Blip(fillColor, station) {
   this.station = station;
-  this.x = random(windowWidth);
-  this.y = random(windowHeight);
+  // Randomize coordinate but keep away from edges of screen
+  this.x = random(50, windowWidth - 50);
+  this.y = random(50, windowHeight - 50);
   // Initialize to starting radius of 10
   this.rad = 10;
   this.fillColor = fillColor;
