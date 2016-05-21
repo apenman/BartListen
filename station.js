@@ -6,13 +6,14 @@ function Station(departureTime, lineColor, direction, abbreviation) {
 
   // Update the time until departure
   this.updateDepartureTime = function(timeSinceLastUpdate) {
-    this.departureTime -= timeSinceLastUpdate;
+    if(this.departureTime) {
+      this.departureTime -= timeSinceLastUpdate;
+    }
   }
   
   // Check if the train is departing
-  // If true, need to update the time
   this.isDeparting = function() {
-    if(this.departureTime <= 0) {
+    if(this.departureTime != null && this.departureTime <= 0) {
       return true;
     }
     

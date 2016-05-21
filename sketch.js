@@ -36,6 +36,20 @@ function hexToRGB(hex){
     } : null;
 }
 
+// Extract the next departure time from XML
+// If train is leaving, the departure value is "Leaving" so skip to next scheduled train
+// Recursion is unnecessary but implemented for fun
+function getDepartureTimeFromXML(xml, index) {
+    var departureTimeMins;
+    if(index > xml.length - 1) {
+      return null;
+    }
+    else {
+      departureTimeMins = parseFloat(xml[index].firstChild.nodeValue);
+      return departureTimeMins ? departureTimeMins * 60 : getDepartureTimeFromXML(xml, index + 1);
+    }
+}
+
 function mapStations(data) {
   var xmlStations = data.getElementsByTagName("station");
   // TODO: handle case where xml node is missing (null values for firstChild)
@@ -44,11 +58,8 @@ function mapStations(data) {
     var station = xmlStations[i];
     var stationName = station.firstChild.firstChild.nodeValue;
     
-    // Get time til departure in seconds
-        // I THINK DEPARTURE TIME BECOMES NULL WHEN PARSEFLOAT TRIES TO PARSE OUT "LEAVING"
-        // If departure time is null -> get the next element in the array? set off a blip first?
-    var departureTime = parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
-    
+    var departureTime = getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
+
     // Returns null if invalid
     // TODO: handle null
     var lineColor = hexToRGB(station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue);
@@ -67,8 +78,7 @@ function mapStations(data) {
 
 // Update station after train has left
 // Callback from loadXML after train leaves
-// TODO: Check that departure time is not "LEAVING" so we don't update to exact same train, due to timing of call
-  // Investigate if case exists where trains may be leaving at same time in opposite directions
+// TODO: Investigate if case exists where trains may be leaving at same time in opposite directions
 function updateStation(data) {
   // This is similar to initial load, find overlaps
   var xmlStations = data.getElementsByTagName("station");
@@ -77,9 +87,8 @@ function updateStation(data) {
   for(var i = 0; i < xmlStations.length; i++) {
     var station = xmlStations[i];
     // update stations map with next departure
-    // add error checking to handle cases where train is delayed a bit (??)
     var stationName = station.firstChild.firstChild.nodeValue;
-    var departureTime = parseFloat(station.getElementsByTagName("minutes")[0].firstChild.nodeValue) * 60;
+    var departureTime = getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
     var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
     var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
   
