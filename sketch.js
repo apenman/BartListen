@@ -36,6 +36,25 @@ function hexToRGB(hex){
     } : null;
 }
 
+// Getting lazy, I suppose we can assume it will always have line color
+function getLineColorFromXML(xml) {
+  var lineColorHex = xml[0].firstChild.nodeValue;
+  var lineColor;
+  if(lineColorHex) {
+    lineColor = hexToRGB(lineColorHex);
+  }
+  else {
+    lineColor = {
+      r:0,
+      g:0,
+      b:0,
+      a:100
+    }
+  }  
+  
+  return lineColor
+}
+
 // Extract the next departure time from XML
 // If train is leaving, the departure value is "Leaving" so skip to next scheduled train
 // Recursion is unnecessary but implemented for fun
@@ -52,27 +71,29 @@ function getDepartureTimeFromXML(xml, index) {
 
 function mapStations(data) {
   var xmlStations = data.getElementsByTagName("station");
-  // TODO: handle case where xml node is missing (null values for firstChild)
-            // probably just set each as a variable first
+  
   for(var i = 0; i < xmlStations.length; i++) {
     var station = xmlStations[i];
     var stationName = station.firstChild.firstChild.nodeValue;
     
-    var departureTime = getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
-
-    // Returns null if invalid
-    // TODO: handle null
-    var lineColor = hexToRGB(station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue);
-    
-    // Get direction train is going
-    var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
-     
-    // "abbr" tag is used for the origin station abbreviation
-    // "abbreviation" tag is used for the destination stations
-    var abbreviation = station.getElementsByTagName("abbr")[0].firstChild.nodeValue;
-    
-    // Create new Station object and add to map
-    stations[stationName] = new Station(departureTime, lineColor, direction, abbreviation);
+    if(stationName) {
+      var departureTime = getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
+  
+      // Get direction train is going
+      var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
+       
+      // "abbr" tag is used for the origin station abbreviation
+      // "abbreviation" tag is used for the destination stations
+      var abbreviation = station.getElementsByTagName("abbr")[0].firstChild.nodeValue;
+      
+      // Create new Station object and add to map
+      stations[stationName] = new Station(
+        departureTime,
+        getLineColorFromXML(station.getElementsByTagName("hexcolor")),
+        direction,
+        abbreviation
+      );
+    }
   }
 }
 
@@ -82,23 +103,27 @@ function mapStations(data) {
 function updateStation(data) {
   // This is similar to initial load, find overlaps
   var xmlStations = data.getElementsByTagName("station");
-    // TODO: handle case where xml node is missing (null values for firstChild)
-            // probably just set each as a variable first
+
   for(var i = 0; i < xmlStations.length; i++) {
     var station = xmlStations[i];
     // update stations map with next departure
     var stationName = station.firstChild.firstChild.nodeValue;
-    var departureTime = getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
-    var lineColor = station.getElementsByTagName("hexcolor")[0].firstChild.nodeValue;
-    var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
-  
-    stations[stationName].updateStation(departureTime, lineColor, direction);
+    
+    if(stationName) {
+      var departureTime = getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
+
+      var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
+      
+      stations[stationName].updateStation(
+        departureTime,
+        getLineColorFromXML(station.getElementsByTagName("hexcolor")),
+        direction
+      );
+    }
   }
 }
 
 // Train is leaving, get next departure
-// TODO: mark that a request is going out and unmark that var in updateStation after done
-          // to avoid any simultaneous updates to station and scatter times a bit more???
 function trainLeaving(station) {
   // play sound
   ding.setVolume(0.1);
