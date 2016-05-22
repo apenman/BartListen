@@ -1,0 +1,10 @@
+{
+  "name": "BartListen",
+  "description": "Visualizing Bart departures",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+  }
+}
