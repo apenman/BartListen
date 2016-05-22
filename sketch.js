@@ -8,7 +8,7 @@ var ding;
 
 // FOR SETTING UP URL FOR BART REQUESTS
 // ADD STATION ABBREVIATION OR 'ALL' BETWEEN baseUrl and urlKey
-var baseUrl = "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=";
+var baseUrl = "https://api.bart.gov/api/etd.aspx?cmd=etd&orig=";
 var urlKey = "&key=MW9S-E7SL-26DU-VV8V";
 
 function preload() {
