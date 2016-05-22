@@ -11,7 +11,8 @@ var path = require('path');
 var fs = require('fs');
 
 var server = http.createServer(handleRequest);
-server.listen(8080);
+var port = process.env.PORT || 8080;
+server.listen(port);
 
 console.log('Server started on port 8080');
 
@@ -36,7 +37,6 @@ function handleRequest(req, res) {
   // What is it?  Default to plain text
 
   var contentType = typeExt[ext] || 'text/plain';
-    console.log(__dirname)
   // User file system module
   fs.readFile(__dirname + pathname,
     // Callback function for reading
