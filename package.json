@@ -6,5 +6,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "http": "~1.0.0",
+    "path": "~1.0.0"
   }
 }
