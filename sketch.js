@@ -78,7 +78,7 @@ function mapStations(data) {
     var stationName = station.firstChild.firstChild.nodeValue;
     
     if(stationName) {
-      var departureTime = getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
+      var departureTime = 2;//getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
   
       // Get direction train is going
       var direction = station.getElementsByTagName("direction")[0].firstChild.nodeValue
