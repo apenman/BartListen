@@ -5,6 +5,11 @@ var lastUpdate = 0;
 var UPDATE_INTERVAL = 2000; // update every 1000 milliseconds = 1 second; increase later for less checking since api only works on minute basis anyways
 var trigger; 
 var ding;
+var nextDepartureTime;
+var nextDepartureStation;
+// Next departure station
+// Setting global to only update when trigger is passed
+var departureText = "";
 
 // FOR SETTING UP URL FOR BART REQUESTS
 // ADD STATION ABBREVIATION OR 'ALL' BETWEEN baseUrl and urlKey
@@ -95,7 +100,9 @@ function mapStations(data) {
         abbreviation
       );
     }
-  }
+  } 
+  
+  getNextDeparture();
 }
 
 // Update station after train has left
@@ -122,6 +129,22 @@ function updateStation(data) {
       );
     }
   }
+}
+
+// Update next departure to display
+function getNextDeparture() {
+  var departureTime = 99999;
+  var departureStation;
+  for(var station in stations) {
+    if(stations[station].departureTime && stations[station].departureTime < departureTime) {
+      departureTime = stations[station].departureTime;
+      departureStation = station;
+    }
+  }
+  
+  nextDepartureTime = departureTime;
+  nextDepartureStation = departureStation;
+  console.log("time set to" + nextDepartureTime);
 }
 
 // Train is leaving, get next departure
@@ -161,8 +184,20 @@ function draw() {
   background(255);
   if(millis() > trigger) {
     updateStations(millis() / 1000);
+    console.log(nextDepartureTime);
+    nextDepartureTime -= millis() - lastUpdate;
+    if(nextDepartureTime) {
+      if(nextDepartureTime <= 0) {
+        getNextDeparture();
+      }
+      departureText = "Next Departure: " + nextDepartureStation.toString() + " in " + nextDepartureTime.toFixed(2).toString() + " seconds.";
+    }
     trigger = millis() + UPDATE_INTERVAL;
   }
+  
+  fill(0, 0, 0);
+  textAlign(CENTER);
+  text(departureText, windowWidth / 2, windowHeight - 10);
   
   // May skip over due to splice. Look into reversing for loop?
   // Does it matter much with rate of draw though?
@@ -175,6 +210,8 @@ function draw() {
       blips[i].display();
     }
   }
+  
+
 }
 
 // XML help
