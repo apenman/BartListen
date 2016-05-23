@@ -1,4 +1,3 @@
-var go = true;
 var stations = {};
 var blips = [];
 var lastUpdate = 0;
