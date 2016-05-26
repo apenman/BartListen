@@ -12,7 +12,7 @@ var departureText = "";
 // FOR SETTING UP URL FOR BART REQUESTS
 // ADD STATION ABBREVIATION OR 'ALL' BETWEEN baseUrl and urlKey
 var baseUrl = "https://api.bart.gov/api/etd.aspx?cmd=etd&orig=";
-var urlKey = "&key=MW9S-E7SL-26DU-VV8V";
+var urlKey = "&key=Z94J-5KT3-982T-DWE9";
 
 function preload() {
   var url = buildRequestUrlFromStation("ALL");
@@ -143,7 +143,6 @@ function getNextDeparture() {
   
   nextDepartureTime = departureTime;
   nextDepartureStation = departureStation;
-  console.log("time set to" + nextDepartureTime);
 }
 
 // Train is leaving, get next departure
@@ -183,7 +182,6 @@ function draw() {
   background(255);
   if(millis() > trigger) {
     updateStations(millis() / 1000);
-    console.log(nextDepartureTime);
     nextDepartureTime -= millis() - lastUpdate;
     if(nextDepartureTime) {
       if(nextDepartureTime <= 0) {
