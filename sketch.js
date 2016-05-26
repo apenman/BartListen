@@ -9,7 +9,6 @@ var nextDepartureStation;
 // Next departure station
 // Setting global to only update when trigger is passed
 var departureText = "";
-
 // FOR SETTING UP URL FOR BART REQUESTS
 // ADD STATION ABBREVIATION OR 'ALL' BETWEEN baseUrl and urlKey
 var baseUrl = "https://api.bart.gov/api/etd.aspx?cmd=etd&orig=";
@@ -40,7 +39,7 @@ function hexToRGB(hex){
     } : null;
 }
 
-// Getting lazy, I suppose we can assume it will always have line color
+// Getting lazy, I suppose we can assume it will always have a line color
 function getLineColorFromXML(xml) {
   var lineColorHex = xml[0].firstChild.nodeValue;
   var lineColor;
@@ -82,6 +81,7 @@ function mapStations(data) {
     var stationName = station.firstChild.firstChild.nodeValue;
     
     if(stationName) {
+      // Leaving at 2 for now just to signal the start
       var departureTime = 2;//getDepartureTimeFromXML(station.getElementsByTagName("minutes"), 0);
   
       // Get direction train is going
